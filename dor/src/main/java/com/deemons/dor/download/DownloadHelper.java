@@ -50,7 +50,7 @@ import static com.deemons.dor.utils.ResponesUtils.retry;
  */
 public class DownloadHelper {
     private int maxRetryCount = 3;
-    private int maxThreads = 3;
+    private int maxThreads = 7;
 
     private String defaultSavePath;
     private DownloadApi downloadApi;

@@ -8,6 +8,7 @@ import android.text.TextUtils;
 import com.deemons.dor.cookie.PersistentCookieJar;
 import com.deemons.dor.cookie.cache.MemoryCookieCache;
 import com.deemons.dor.cookie.persistence.SharedPrefsCookiePersistor;
+import com.deemons.dor.download.RxDownload;
 import com.deemons.dor.utils.CheckUtils;
 
 import java.io.File;
@@ -74,16 +75,17 @@ public final class Net {
     private CookieJar cookieJar;
     private Retrofit retrofit;
     private RxCache rxCache;
+    private RxDownload mDownload;
 
 
     /**
      * Net 初始化
      *
      * @param context ApplicationContext
-     * @param baseUrl Host
+     *
      */
-    public static void init(Context context, String baseUrl) {
-        init(builder().context(context).baseUrl(baseUrl));
+    public static void init(Context context) {
+        init(builder().context(context));
     }
 
 
@@ -93,7 +95,6 @@ public final class Net {
      * @param builder Net.Builder Net.builder()
      */
     public static void init(@NonNull Net.Builder builder) {
-        CheckUtils.checkNotNull(builder.apiUrl, "baseUrl is required");
         CheckUtils.checkNotNull(builder.context, "context is required");
 
         if (builder.mLoggingInterceptor == null) {
@@ -125,6 +126,11 @@ public final class Net {
         return net.retrofit;
     }
 
+    public static RxDownload getDownload() {
+        CheckUtils.checkNotNull(net, "Pleas init Net first!");
+        return net.mDownload;
+    }
+
     public static <T> T getService(Class<T> service) {
         return getRetrofit().create(service);
     }
@@ -153,6 +159,8 @@ public final class Net {
 
         retrofit = initRetrofit();
         rxCache = initRxCache();
+
+        mDownload = RxDownload.init(context, retrofit);
     }
 
 

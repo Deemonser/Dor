@@ -1,176 +1,168 @@
-//package com.deemons.dor.download;
-//
-//import android.annotation.SuppressLint;
-//import android.content.ComponentName;
-//import android.content.Context;
-//import android.content.Intent;
-//import android.content.ServiceConnection;
-//import android.os.IBinder;
-//import android.support.annotation.Nullable;
-//
-//import com.deemons.dor.download.entity.DownloadBean;
-//import com.deemons.dor.download.entity.DownloadRecord;
-//import com.deemons.dor.download.entity.Status;
-//import com.deemons.dor.utils.ResponesUtils;
-//
-//import java.io.File;
-//import java.io.InterruptedIOException;
-//import java.net.SocketException;
-//import java.util.ArrayList;
-//import java.util.Arrays;
-//import java.util.List;
-//import java.util.concurrent.Semaphore;
-//
-//import io.reactivex.Observable;
-//import io.reactivex.ObservableEmitter;
-//import io.reactivex.ObservableOnSubscribe;
-//import io.reactivex.ObservableSource;
-//import io.reactivex.ObservableTransformer;
-//import io.reactivex.android.schedulers.AndroidSchedulers;
-//import io.reactivex.functions.Consumer;
-//import io.reactivex.functions.Function;
-//import io.reactivex.plugins.RxJavaPlugins;
-//import io.reactivex.schedulers.Schedulers;
-//import retrofit2.Retrofit;
-//
-//import static com.deemons.dor.utils.ResponesUtils.log;
-//
-///**
-// * Author: Season(ssseasonnn@gmail.com)
-// * Date: 2016/10/19
-// * Time: 10:46
-// * RxDownload
-// */
-//public class RxDownload {
-//    private static final Object object = new Object();
-//    @SuppressLint("StaticFieldLeak")
-//    private volatile static RxDownload instance;
-//    private volatile static boolean bound = false;
-//
-//    static {
-//        RxJavaPlugins.setErrorHandler(new Consumer<Throwable>() {
-//            @Override
-//            public void accept(Throwable throwable) throws Exception {
-//                if (throwable instanceof InterruptedException) {
-//                    log("Thread interrupted");
-//                } else if (throwable instanceof InterruptedIOException) {
-//                    log("Io interrupted");
-//                } else if (throwable instanceof SocketException) {
-//                    log("Socket error");
-//                }
-//            }
-//        });
-//    }
-//
-//    private int maxDownloadNumber = 5;
-//
-//    private Context context;
-//    private Semaphore semaphore;
-//
-////    private DownloadService downloadService;
-//    private DownloadHelper downloadHelper;
-//
-//    private RxDownload(Context context) {
-//        this.context = context.getApplicationContext();
-//        downloadHelper = new DownloadHelper(context);
-//        semaphore = new Semaphore(1);
-//    }
-//
-//    /**
-//     * Return RxDownload Instance
-//     *
-//     * @param context context
-//     * @return RxDownload
-//     */
-//    public static RxDownload getInstance(Context context) {
-//        if (instance == null) {
-//            synchronized (RxDownload.class) {
-//                if (instance == null) {
-//                    instance = new RxDownload(context);
-//                }
-//            }
-//        }
-//        return instance;
-//    }
-//
-//    /**
-//     * get Files by url. May be NULL if this url record not exists.
-//     * File[] {DownloadFile, TempFile, LastModifyFile}
-//     *
-//     * @param url url
-//     * @return Files
-//     */
-//    @Nullable
-//    public File[] getRealFiles(String url) {
-//        return downloadHelper.getFiles(url);
-//    }
-//
-//    /**
-//     * get Files by saveName and savePath.
-//     *
-//     * @param saveName saveName
-//     * @param savePath savePath
-//     * @return Files
-//     */
-//    public File[] getRealFiles(String saveName, String savePath) {
-//        return ResponesUtils.getFiles(saveName, savePath);
-//    }
-//
-//    /**
-//     * set default save path.
-//     *
-//     * @param savePath default save path.
-//     * @return instance.
-//     */
-//    public RxDownload defaultSavePath(String savePath) {
-//        downloadHelper.setDefaultSavePath(savePath);
-//        return this;
-//    }
-//
-//    /**
-//     * If you have own Retrofit client, set it.
-//     *
-//     * @param retrofit retrofit client
-//     * @return instance.
-//     */
-//    public RxDownload retrofit(Retrofit retrofit) {
-//        downloadHelper.setRetrofit(retrofit);
-//        return this;
-//    }
-//
-//    /**
-//     * set max thread to download file.
-//     *
-//     * @param max max threads
-//     * @return instance
-//     */
-//    public RxDownload maxThread(int max) {
-//        downloadHelper.setMaxThreads(max);
-//        return this;
-//    }
-//
-//    /**
-//     * set max retry count when download failed
-//     *
-//     * @param max max retry count
-//     * @return instance
-//     */
-//    public RxDownload maxRetryCount(int max) {
-//        downloadHelper.setMaxRetryCount(max);
-//        return this;
-//    }
-//
-//    /**
-//     * set max download number when service download
-//     *
-//     * @param max max download number
-//     * @return instance
-//     */
-//    public RxDownload maxDownloadNumber(int max) {
-//        this.maxDownloadNumber = max;
-//        return this;
-//    }
-//
+package com.deemons.dor.download;
+
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.support.annotation.Nullable;
+
+import com.deemons.dor.download.constant.DownloadApi;
+import com.deemons.dor.download.entity.DownloadBean;
+import com.deemons.dor.download.entity.DownloadRecord;
+import com.deemons.dor.download.entity.Status;
+import com.deemons.dor.utils.ResponesUtils;
+
+import java.io.File;
+import java.io.InterruptedIOException;
+import java.net.SocketException;
+import java.util.List;
+import java.util.concurrent.Semaphore;
+
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableSource;
+import io.reactivex.ObservableTransformer;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
+import io.reactivex.plugins.RxJavaPlugins;
+import retrofit2.Retrofit;
+
+import static com.deemons.dor.utils.ResponesUtils.log;
+
+/**
+ * Author: Season(ssseasonnn@gmail.com)
+ * Date: 2016/10/19
+ * Time: 10:46
+ * RxDownload
+ */
+public class RxDownload {
+    private static final Object object = new Object();
+    @SuppressLint("StaticFieldLeak")
+    private volatile static RxDownload instance;
+    private volatile static boolean bound = false;
+
+    static {
+        RxJavaPlugins.setErrorHandler(new Consumer<Throwable>() {
+            @Override
+            public void accept(Throwable throwable) throws Exception {
+                if (throwable instanceof InterruptedException) {
+                    log("Thread interrupted");
+                } else if (throwable instanceof InterruptedIOException) {
+                    log("Io interrupted");
+                } else if (throwable instanceof SocketException) {
+                    log("Socket error");
+                }
+            }
+        });
+    }
+
+    private int maxDownloadNumber = 5;
+
+    private Context context;
+    private Semaphore semaphore;
+
+//    private DownloadService downloadService;
+    private DownloadHelper downloadHelper;
+
+    private RxDownload(Context context, DownloadApi api) {
+        this.context = context.getApplicationContext();
+        downloadHelper = new DownloadHelper(context,api);
+        semaphore = new Semaphore(1);
+    }
+
+    /**
+     * Return RxDownload Instance
+     *
+     * @param context context
+     * @return RxDownload
+     */
+    public static RxDownload init(Context context,Retrofit retrofit) {
+        if (instance == null) {
+            synchronized (RxDownload.class) {
+                if (instance == null) {
+                    instance = new RxDownload(context,retrofit.create(DownloadApi.class));
+                }
+            }
+        }
+        return instance;
+    }
+
+    /**
+     * get Files by url. May be NULL if this url record not exists.
+     * File[] {DownloadFile, TempFile, LastModifyFile}
+     *
+     * @param url url
+     * @return Files
+     */
+    @Nullable
+    public File[] getRealFiles(String url) {
+        return downloadHelper.getFiles(url);
+    }
+
+    /**
+     * get Files by saveName and savePath.
+     *
+     * @param saveName saveName
+     * @param savePath savePath
+     * @return Files
+     */
+    public File[] getRealFiles(String saveName, String savePath) {
+        return ResponesUtils.getFiles(saveName, savePath);
+    }
+
+    /**
+     * set default save path.
+     *
+     * @param savePath default save path.
+     * @return instance.
+     */
+    public RxDownload defaultSavePath(String savePath) {
+        downloadHelper.setDefaultSavePath(savePath);
+        return this;
+    }
+
+    /**
+     * If you have own Retrofit client, set it.
+     *
+     * @param retrofit retrofit client
+     * @return instance.
+     */
+    public RxDownload retrofit(Retrofit retrofit) {
+        downloadHelper.setRetrofit(retrofit);
+        return this;
+    }
+
+    /**
+     * set max thread to download file.
+     *
+     * @param max max threads
+     * @return instance
+     */
+    public RxDownload maxThread(int max) {
+        downloadHelper.setMaxThreads(max);
+        return this;
+    }
+
+    /**
+     * set max retry count when download failed
+     *
+     * @param max max retry count
+     * @return instance
+     */
+    public RxDownload maxRetryCount(int max) {
+        downloadHelper.setMaxRetryCount(max);
+        return this;
+    }
+
+    /**
+     * set max download number when service download
+     *
+     * @param max max download number
+     * @return instance
+     */
+    public RxDownload maxDownloadNumber(int max) {
+        this.maxDownloadNumber = max;
+        return this;
+    }
+
 //    /**
 //     * Receive the url download event.
 //     * <p>
@@ -194,27 +186,27 @@
 //                })
 //                .observeOn(AndroidSchedulers.mainThread());
 //    }
-//
-//    /**
-//     * Read all the download record from the database.
-//     *
-//     * @return Observable<List<DownloadRecord>>
-//     */
-//    public Observable<List<DownloadRecord>> getTotalDownloadRecords() {
-//        return downloadHelper.readAllRecords();
-//    }
-//
-//    /**
-//     * Read single download record with url.
-//     * If record contain, return correct record, else return empty record.
-//     *
-//     * @param url download url
-//     * @return Observable<DownloadStatus>
-//     */
-//    public Observable<DownloadRecord> getDownloadRecord(String url) {
-//        return downloadHelper.readRecord(url);
-//    }
-//
+
+    /**
+     * Read all the download record from the database.
+     *
+     * @return Observable<List<DownloadRecord>>
+     */
+    public Observable<List<DownloadRecord>> getTotalDownloadRecords() {
+        return downloadHelper.readAllRecords();
+    }
+
+    /**
+     * Read single download record with url.
+     * If record contain, return correct record, else return empty record.
+     *
+     * @param url download url
+     * @return Observable<DownloadStatus>
+     */
+    public Observable<DownloadRecord> getDownloadRecord(String url) {
+        return downloadHelper.readRecord(url);
+    }
+
 //    /**
 //     * Pause download.
 //     * <p>
@@ -322,128 +314,124 @@
 //        }).observeOn(AndroidSchedulers.mainThread());
 //
 //    }
-//
-//    /**
-//     * Normal download.
-//     * <p>
-//     * Will save the download records in the database.
-//     * <p>
-//     * Un subscribe will pause download.
-//     *
-//     * @param url Url
-//     * @return Observable<DownloadStatus>
-//     */
-//    public Observable<Status> download(String url) {
-//        return download(url, null);
-//    }
-//
-//    /**
-//     * Normal download with assigned Name.
-//     *
-//     * @param url      url
-//     * @param saveName SaveName
-//     * @return Observable<DownloadStatus>
-//     */
-//    public Observable<Status> download(String url, String saveName) {
-//        return download(url, saveName, null);
-//    }
-//
-//    /**
-//     * Normal download with assigned name and path.
-//     *
-//     * @param url      url
-//     * @param saveName SaveName
-//     * @param savePath SavePath
-//     * @return Observable<DownloadStatus>
-//     */
-//    public Observable<Status> download(String url, String saveName, String savePath) {
-//        return download(new DownloadBean.Builder(url).setSaveName(saveName)
-//                .setSavePath(savePath).build());
-//    }
-//
-//    /**
-//     * Normal download.
-//     * <p>
-//     * You can construct a DownloadBean to save extra data to the database.
-//     *
-//     * @param downloadBean download bean.
-//     * @return Observable<DownloadStatus>
-//     */
-//    public Observable<Status> download(DownloadBean downloadBean) {
-//        return downloadHelper.downloadDispatcher(downloadBean);
-//    }
-//
-//    /**
-//     * Normal download for Transformer.
-//     *
-//     * @param url        url
-//     * @param <Upstream> Upstream
-//     * @return Transformer
-//     */
-//    public <Upstream> ObservableTransformer<Upstream, Status> transform(String url) {
-//        return transform(url, null);
-//    }
-//
-//    /**
-//     * Normal download for Transformer.
-//     *
-//     * @param url        url
-//     * @param saveName   saveName
-//     * @param <Upstream> Upstream
-//     * @return Transformer
-//     */
-//    public <Upstream> ObservableTransformer<Upstream, DownloadStatus> transform(
-//            String url, String saveName) {
-//        return transform(url, saveName, null);
-//    }
-//
-//    /**
-//     * Normal download for Transformer.
-//     *
-//     * @param url        url
-//     * @param saveName   saveName
-//     * @param <Upstream> Upstream
-//     * @return Transformer
-//     */
-//    public <Upstream> ObservableTransformer<Upstream, DownloadStatus> transform(
-//            String url, String saveName, String savePath) {
-//
-//        return transform(new DownloadBean.Builder(url)
-//                .setSaveName(saveName).setSavePath(savePath).build());
-//    }
-//
-//    /**
-//     * Normal download version of the Transformer.
-//     *
-//     * @param downloadBean download bean
-//     * @param <Upstream>   Upstream
-//     * @return Transformer
-//     */
-//    public <Upstream> ObservableTransformer<Upstream, DownloadStatus> transform(
-//            final DownloadBean downloadBean) {
-//        return new ObservableTransformer<Upstream, DownloadStatus>() {
-//            @Override
-//            public ObservableSource<DownloadStatus> apply(Observable<Upstream> upstream) {
-//                return upstream.flatMap(new Function<Upstream, ObservableSource<DownloadStatus>>() {
-//                    @Override
-//                    public ObservableSource<DownloadStatus> apply(Upstream upstream) throws Exception {
-//                        return download(downloadBean);
-//                    }
-//                });
-//            }
-//        };
-//    }
-//
+
+    /**
+     * Normal download.
+     * <p>
+     * Will save the download records in the database.
+     * <p>
+     * Un subscribe will pause download.
+     *
+     * @param url Url
+     * @return Observable<DownloadStatus>
+     */
+    public Observable<Status> download(String url) {
+        return download(url, null);
+    }
+
+    /**
+     * Normal download with assigned Name.
+     *
+     * @param url      url
+     * @param saveName SaveName
+     * @return Observable<DownloadStatus>
+     */
+    public Observable<Status> download(String url, String saveName) {
+        return download(url, saveName, null);
+    }
+
+    /**
+     * Normal download with assigned name and path.
+     *
+     * @param url      url
+     * @param saveName SaveName
+     * @param savePath SavePath
+     * @return Observable<DownloadStatus>
+     */
+    public Observable<Status> download(String url, String saveName, String savePath) {
+        return download(new DownloadBean.Builder(url).setSaveName(saveName)
+                .setSavePath(savePath).build());
+    }
+
+    /**
+     * Normal download.
+     * <p>
+     * You can construct a DownloadBean to save extra data to the database.
+     *
+     * @param downloadBean download bean.
+     * @return Observable<DownloadStatus>
+     */
+    public Observable<Status> download(DownloadBean downloadBean) {
+        return downloadHelper.downloadDispatcher(downloadBean);
+    }
+
+    /**
+     * Normal download for Transformer.
+     *
+     * @param url        url
+     * @param <Upstream> Upstream
+     * @return Transformer
+     */
+    public <Upstream> ObservableTransformer<Upstream, Status> transform(String url) {
+        return transform(url, null);
+    }
+
+    /**
+     * Normal download for Transformer.
+     *
+     * @param url        url
+     * @param saveName   saveName
+     * @param <Upstream> Upstream
+     * @return Transformer
+     */
+    public <Upstream> ObservableTransformer<Upstream, Status> transform(
+            String url, String saveName) {
+        return transform(url, saveName, null);
+    }
+
+    /**
+     * Normal download for Transformer.
+     *
+     * @param url        url
+     * @param saveName   saveName
+     * @param <Upstream> Upstream
+     * @return Transformer
+     */
+    public <Upstream> ObservableTransformer<Upstream, Status> transform(
+            String url, String saveName, String savePath) {
+
+        return transform(new DownloadBean.Builder(url)
+                .setSaveName(saveName).setSavePath(savePath).build());
+    }
+
+    /**
+     * Normal download version of the Transformer.
+     *
+     * @param downloadBean download bean
+     * @param <Upstream>   Upstream
+     * @return Transformer
+     */
+    public <Upstream> ObservableTransformer<Upstream, Status> transform(
+            final DownloadBean downloadBean) {
+        return new ObservableTransformer<Upstream, Status>() {
+            @Override
+            public ObservableSource<Status> apply(Observable<Upstream> upstream) {
+                return upstream.flatMap(new Function<Upstream, ObservableSource<Status>>() {
+                    @Override
+                    public ObservableSource<Status> apply(Upstream upstream) throws Exception {
+                        return download(downloadBean);
+                    }
+                });
+            }
+        };
+    }
+
 //    /**
 //     * Using Service to download single url.
 //     * <p>
 //     * Will save the download records in the database.
 //     * <p>
 //     * Un subscribe will not pause download.
-//     * <p>
-//     * If you want receive download status, see {@link #receiveDownloadStatus(String)}
-//     * <p>
-//     * If you want pause download, see {@link #pauseServiceDownload(String)}
 //     * <p>
 //     * If you want get record from database, see {@link #getDownloadRecord(String)}
 //     *
@@ -453,7 +441,7 @@
 //    public Observable<?> serviceDownload(String url) {
 //        return serviceDownload(url, "");
 //    }
-//
+
 //    /**
 //     * Using Service to download.
 //     *
@@ -464,7 +452,7 @@
 //    public Observable<?> serviceDownload(String url, String saveName) {
 //        return serviceDownload(url, saveName, null);
 //    }
-//
+
 //    /**
 //     * Using Service to download.
 //     *
@@ -477,7 +465,7 @@
 //        return serviceDownload(new DownloadBean.Builder(url)
 //                .setSaveName(saveName).setSavePath(savePath).build());
 //    }
-//
+
 //    /**
 //     * Using Service to download.
 //     *
@@ -492,7 +480,7 @@
 //            }
 //        }).observeOn(AndroidSchedulers.mainThread());
 //    }
-//
+
 //    /**
 //     * Service download version of the Transformer.
 //     *
@@ -503,7 +491,7 @@
 //    public <Upstream> ObservableTransformer<Upstream, Object> transformService(String url) {
 //        return transformService(url, null);
 //    }
-//
+
 //    /**
 //     * Service download version of the Transformer.
 //     *
@@ -516,7 +504,7 @@
 //                                                                               String saveName) {
 //        return transformService(url, saveName, null);
 //    }
-//
+
 //    /**
 //     * Service download version of the Transformer.
 //     *
@@ -532,7 +520,7 @@
 //        return transformService(new DownloadBean.Builder(url)
 //                .setSaveName(saveName).setSavePath(savePath).build());
 //    }
-//
+
 //    /**
 //     * Service download version of the Transformer.
 //     *
@@ -553,7 +541,7 @@
 //            }
 //        };
 //    }
-//
+
 //    /**
 //     * Using Service to download multi urls.
 //     *
@@ -564,7 +552,7 @@
 //    public Observable<?> serviceMultiDownload(String missionId, String... urls) {
 //        return serviceMultiDownload(missionId, Arrays.asList(urls));
 //    }
-//
+
 //    /**
 //     * Using Service to download multi urls.
 //     *
@@ -579,7 +567,7 @@
 //        }
 //        return serviceMultiDownload(list, missionId);
 //    }
-//
+
 //    /**
 //     * Using Service to download multi urls.
 //     *
@@ -595,7 +583,7 @@
 //            }
 //        }).observeOn(AndroidSchedulers.mainThread());
 //    }
-//
+
 //    /**
 //     * Service multi download version of the Transformer.
 //     *
@@ -608,7 +596,7 @@
 //            String missionId, String... urls) {
 //        return transformMulti(missionId, Arrays.asList(urls));
 //    }
-//
+
 //    /**
 //     * Service multi download version of the Transformer.
 //     *
@@ -625,7 +613,7 @@
 //        }
 //        return transformMulti(list, missionId);
 //    }
-//
+
 //    /**
 //     * Service multi download version of the Transformer.
 //     *
@@ -648,7 +636,7 @@
 //            }
 //        };
 //    }
-//
+
 //    /**
 //     * return general observable
 //     *
@@ -679,19 +667,19 @@
 //            }
 //        }).subscribeOn(Schedulers.io());
 //    }
-//
-//    private void doCall(GeneralObservableCallback callback, ObservableEmitter<Object> emitter) {
-//        if (callback != null) {
-//            try {
-//                callback.call();
-//            } catch (Exception e) {
-//                emitter.onError(e);
-//            }
-//        }
-//        emitter.onNext(object);
-//        emitter.onComplete();
-//    }
-//
+
+    private void doCall(GeneralObservableCallback callback, ObservableEmitter<Object> emitter) {
+        if (callback != null) {
+            try {
+                callback.call();
+            } catch (Exception e) {
+                emitter.onError(e);
+            }
+        }
+        emitter.onNext(object);
+        emitter.onComplete();
+    }
+
 //    /**
 //     * start and bind service.
 //     *
@@ -719,12 +707,12 @@
 //            }
 //        }, Context.BIND_AUTO_CREATE);
 //    }
-//
-//    private interface GeneralObservableCallback {
-//        void call() throws Exception;
-//    }
-//
-//    private interface ServiceConnectedCallback {
-//        void call();
-//    }
-//}
+
+    private interface GeneralObservableCallback {
+        void call() throws Exception;
+    }
+
+    private interface ServiceConnectedCallback {
+        void call();
+    }
+}

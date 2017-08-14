@@ -1,19 +1,26 @@
 package com.deemons.dor.download.check;
 
+import com.deemons.dor.download.entity.DownloadBean;
+import com.deemons.dor.download.temporary.TemporaryBean;
+
+import io.reactivex.Observable;
+
 /**
  * author： deemons
  * date:    2017/8/13
  * desc:
  */
 
-interface ICheckHelper {
+public interface ICheckHelper {
 
-    void checkFileExist();
+    Observable<TemporaryBean> dispatchCheck(DownloadBean downloadBean);
 
-    void checkFileWhole();
+    Observable<TemporaryBean> checkFileExist();
 
-    void checkFileUpdate();
+    Observable<TemporaryBean> checkFileWhole();
 
-    void checkRecordFile();
+    Observable<TemporaryBean> checkFileUpdate();
+
+    Observable<TemporaryBean> checkRecordFile();
 
 }

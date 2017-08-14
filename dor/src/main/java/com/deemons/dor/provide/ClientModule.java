@@ -4,7 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.deemons.dor.cookie.PersistentCookieJar;
-import com.deemons.dor.def.RequestIntercept;
+//import com.deemons.dor.def.RequestIntercept;
 import com.deemons.dor.error.core.RxErrorHandler;
 import com.deemons.dor.error.handler.listener.ErrorListener;
 import com.deemons.dor.inte.GlobeHttpHandler;
@@ -100,11 +100,11 @@ public class ClientModule {
     }
 
 
-    @Singleton
-    @Provides
-    Interceptor provideIntercept(RequestIntercept requestIntercept) {
-        return requestIntercept;//自定义的拦截器
-    }
+//    @Singleton
+//    @Provides
+//    Interceptor provideIntercept(RequestIntercept requestIntercept) {
+//        return requestIntercept;//自定义的拦截器
+//    }
 
 
     /**

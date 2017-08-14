@@ -32,4 +32,15 @@ public class Status {
         this.totalSize = totalSize;
         this.downloadSize = downloadSize;
     }
+
+
+    @Override
+    public String toString() {
+        return "Status{" +
+                "mFlag=" + mFlag +
+                ", isChunked=" + isChunked +
+                ", totalSize=" + totalSize +
+                ", downloadSize=" + downloadSize +
+                '}';
+    }
 }

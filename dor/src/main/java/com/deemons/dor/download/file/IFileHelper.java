@@ -6,6 +6,6 @@ package com.deemons.dor.download.file;
  * desc:
  */
 
-interface IFileHelper {
+public interface IFileHelper {
 
 }
