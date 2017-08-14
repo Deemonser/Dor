@@ -1,6 +1,7 @@
 package com.deemons.dor.download.check;
 
 import com.deemons.dor.download.entity.DownloadBean;
+import com.deemons.dor.download.task.Task;
 import com.deemons.dor.download.temporary.TemporaryBean;
 
 import io.reactivex.Observable;
@@ -13,14 +14,14 @@ import io.reactivex.Observable;
 
 public interface ICheckHelper {
 
-    Observable<TemporaryBean> dispatchCheck(DownloadBean downloadBean);
+    Observable<Task> dispatchCheck(DownloadBean downloadBean);
 
-    Observable<TemporaryBean> checkFileExist();
+    Observable<TemporaryBean> checkFileExist(TemporaryBean bean);
 
-    Observable<TemporaryBean> checkFileWhole();
+    Observable<TemporaryBean> checkFileWhole(TemporaryBean bean);
 
-    Observable<TemporaryBean> checkFileUpdate();
+    Observable<TemporaryBean> checkFileUpdate(TemporaryBean bean);
 
-    Observable<TemporaryBean> checkRecordFile();
+    Observable<TemporaryBean> checkRecordFile(TemporaryBean bean);
 
 }
