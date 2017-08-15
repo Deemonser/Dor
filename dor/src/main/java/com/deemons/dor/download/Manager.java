@@ -1,9 +1,13 @@
 package com.deemons.dor.download;
 
+import com.deemons.dor.download.check.CheckHelper;
 import com.deemons.dor.download.check.ICheckHelper;
+import com.deemons.dor.download.constant.DownloadApi;
+import com.deemons.dor.download.db.DataBaseHelper;
 import com.deemons.dor.download.entity.DownloadBean;
 import com.deemons.dor.download.entity.Status;
 import com.deemons.dor.download.load.ILoadHelper;
+import com.deemons.dor.download.load.LoadHelper;
 import com.deemons.dor.download.task.Task;
 import com.deemons.dor.download.temporary.TemporaryRecord;
 
@@ -15,6 +19,7 @@ import java.util.Map;
 import io.reactivex.Observable;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.functions.Function;
+import retrofit2.Retrofit;
 
 /**
  * 创建者      chenghaohao
@@ -28,6 +33,17 @@ public class Manager {
     ICheckHelper mCheckHelper;
 
     ILoadHelper mLoadHelper;
+
+    DataBaseHelper dataBaseHelper;
+
+    public Manager(Retrofit retrofit) {
+
+
+        mCheckHelper = new CheckHelper(retrofit.create(DownloadApi.class));
+
+        mLoadHelper = new LoadHelper();
+
+    }
 
     public Observable<Status> download(DownloadBean downloadBean) {
         return Observable.just(downloadBean)

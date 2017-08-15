@@ -39,9 +39,13 @@ public abstract class Task {
     protected FileHelper mFileHelper;
     protected DownloadApi mApi;
 
-    protected Task(TemporaryBean mBean) {
+    public Task(TemporaryBean mBean, DataBaseHelper dataBaseHelper, FileHelper mFileHelper, DownloadApi mApi) {
         this.mBean = mBean;
+        this.dataBaseHelper = dataBaseHelper;
+        this.mFileHelper = mFileHelper;
+        this.mApi = mApi;
     }
+
 
     public void prepareDownload() throws IOException, ParseException {
         log(prepareLog());
@@ -132,7 +136,6 @@ public abstract class Task {
     protected String finishLog() {
         return "";
     }
-
 
 
     public void start() {

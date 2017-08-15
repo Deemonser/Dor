@@ -3,6 +3,9 @@ package com.deemons.dor.download.load;
 import com.deemons.dor.download.entity.Status;
 import com.deemons.dor.download.task.Task;
 
+import java.io.IOException;
+import java.text.ParseException;
+
 import io.reactivex.Observable;
 
 /**
@@ -13,7 +16,7 @@ import io.reactivex.Observable;
 
 public interface ILoadHelper {
 
-    Observable<Status> dispatchDownload(Task task);
+    Observable<Status> dispatchDownload(Task task) throws IOException, ParseException;
 
     void checkRange();
 
