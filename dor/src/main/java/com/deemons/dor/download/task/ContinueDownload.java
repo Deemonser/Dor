@@ -1,7 +1,8 @@
 package com.deemons.dor.download.task;
 
+import com.deemons.dor.download.entity.DownloadRange;
 import com.deemons.dor.download.entity.Status;
-import com.deemons.dor.download.temporary.TemporaryRecord;
+import com.deemons.dor.download.temporary.TemporaryBean;
 import com.deemons.dor.utils.ResponesUtils;
 
 import org.reactivestreams.Publisher;
@@ -25,8 +26,10 @@ import static com.deemons.dor.download.constant.Constant.CONTINUE_DOWNLOAD_FAILE
 import static com.deemons.dor.download.constant.Constant.CONTINUE_DOWNLOAD_FINISH;
 import static com.deemons.dor.download.constant.Constant.CONTINUE_DOWNLOAD_PREPARE;
 import static com.deemons.dor.download.constant.Constant.CONTINUE_DOWNLOAD_STARTED;
+import static com.deemons.dor.download.constant.Constant.RANGE_DOWNLOAD_STARTED;
 import static com.deemons.dor.download.constant.Constant.RANGE_RETRY_HINT;
 import static com.deemons.dor.utils.ResponesUtils.formatStr;
+import static com.deemons.dor.utils.ResponesUtils.log;
 
 /**
  * author： deemons
@@ -36,14 +39,14 @@ import static com.deemons.dor.utils.ResponesUtils.formatStr;
 
 public class ContinueDownload extends Task {
 
-    public ContinueDownload(TemporaryRecord record) {
+    public ContinueDownload(TemporaryBean record) {
         super(record);
     }
 
     @Override
     protected Publisher<Status> download() {
         List<Publisher<Status>> tasks = new ArrayList<>();
-        for (int i = 0; i < record.getMaxThreads(); i++) {
+        for (int i = 0; i < mBean.maxThreads; i++) {
             tasks.add(rangeDownload(i));
         }
         return Flowable.mergeDelayError(tasks);
@@ -86,7 +89,26 @@ public class ContinueDownload extends Task {
      * @return Observable
      */
     private Publisher<Status> rangeDownload(final int index) {
-        return record.rangeDownload(index)
+        return Flowable
+                .create(new FlowableOnSubscribe<DownloadRange>() {
+                    @Override
+                    public void subscribe(FlowableEmitter<DownloadRange> e) throws Exception {
+                        DownloadRange range = mFileHelper.readDownloadRange(mBean.tempFile(), index);
+                        if (range.legal()) {
+                            e.onNext(range);
+                        }
+                        e.onComplete();
+                    }
+                }, BackpressureStrategy.ERROR)
+                .flatMap(new Function<DownloadRange, Publisher<Response<ResponseBody>>>() {
+                    @Override
+                    public Publisher<Response<ResponseBody>> apply(DownloadRange range)
+                            throws Exception {
+                        log("Thread: " + Thread.currentThread().getName() + "; " + RANGE_DOWNLOAD_STARTED, index, range.start, range.end);
+                        String rangeStr = "bytes=" + range.start + "-" + range.end;
+                        return mApi.download(rangeStr, mBean.bean.url);
+                    }
+                })
                 .subscribeOn(Schedulers.io())  //Important!
                 .flatMap(new Function<Response<ResponseBody>, Publisher<Status>>() {
                     @Override
@@ -94,8 +116,9 @@ public class ContinueDownload extends Task {
                         return save(index, response.body());
                     }
                 })
-                .compose(ResponesUtils.<Status>retry2(formatStr(RANGE_RETRY_HINT, index), record.getMaxRetryCount()));
+                .compose(ResponesUtils.<Status>retry2(formatStr(RANGE_RETRY_HINT, index), mBean.maxRetryCount));
     }
+
 
     /**
      * 保存断点下载的文件,以及下载进度
@@ -109,7 +132,7 @@ public class ContinueDownload extends Task {
         Flowable<Status> flowable = Flowable.create(new FlowableOnSubscribe<Status>() {
             @Override
             public void subscribe(FlowableEmitter<Status> emitter) throws Exception {
-                record.save(emitter, index, response);
+                mFileHelper.saveFile(emitter, index, mBean.tempFile(), mBean.file(), response);
             }
         }, BackpressureStrategy.LATEST)
                 .replay(1)

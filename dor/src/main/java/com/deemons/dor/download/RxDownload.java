@@ -86,7 +86,7 @@ public class RxDownload {
     }
 
     /**
-     * get Files by url. May be NULL if this url record not exists.
+     * get Files by url. May be NULL if this url mBean not exists.
      * File[] {DownloadFile, TempFile, LastModifyFile}
      *
      * @param url url
@@ -188,7 +188,7 @@ public class RxDownload {
 //    }
 
     /**
-     * Read all the download record from the database.
+     * Read all the download mBean from the database.
      *
      * @return Observable<List<DownloadRecord>>
      */
@@ -197,8 +197,8 @@ public class RxDownload {
     }
 
     /**
-     * Read single download record with url.
-     * If record contain, return correct record, else return empty record.
+     * Read single download mBean with url.
+     * If mBean contain, return correct mBean, else return empty mBean.
      *
      * @param url download url
      * @return Observable<DownloadStatus>
@@ -433,7 +433,7 @@ public class RxDownload {
 //     * <p>
 //     * Un subscribe will not pause download.
 //     * <p>
-//     * If you want get record from database, see {@link #getDownloadRecord(String)}
+//     * If you want get mBean from database, see {@link #getDownloadRecord(String)}
 //     *
 //     * @param url url
 //     * @return Observable<DownloadStatus>

@@ -2,10 +2,6 @@ package com.deemons.dor.download.temporary;
 
 import com.deemons.dor.download.constant.DownloadApi;
 import com.deemons.dor.download.db.DataBaseHelper;
-import com.deemons.dor.download.task.AlreadyDownloaded;
-import com.deemons.dor.download.task.ContinueDownload;
-import com.deemons.dor.download.task.MultiThreadDownload;
-import com.deemons.dor.download.task.NormalDownload;
 import com.deemons.dor.download.task.Task;
 
 import java.io.File;
@@ -163,13 +159,14 @@ public class TemporaryRecordTable {
     }
 
     private Task getNormalType(String url) {
-        Task type;
-        if (supportRange(url)) {
-            type = new MultiThreadDownload(map.get(url));
-        } else {
-            type = new NormalDownload(map.get(url));
-        }
-        return type;
+//        Task type;
+//        if (supportRange(url)) {
+//            type = new MultiThreadDownload(map.get(url));
+//        } else {
+//            type = new NormalDownload(map.get(url));
+//        }
+//        return type;
+        return null;
     }
 
     private Task getServerFileChangeType(String url) {
@@ -181,25 +178,28 @@ public class TemporaryRecordTable {
     }
 
     private Task supportRangeType(String url) {
-        if (needReDownload(url)) {
-            return new MultiThreadDownload(map.get(url));
-        }
-        try {
-            if (multiDownloadNotComplete(url)) {
-                return new ContinueDownload(map.get(url));
-            }
-        } catch (IOException e) {
-            return new MultiThreadDownload(map.get(url));
-        }
-        return new AlreadyDownloaded(map.get(url));
+//        if (needReDownload(url)) {
+//            return new MultiThreadDownload(map.get(url));
+//        }
+//        try {
+//            if (multiDownloadNotComplete(url)) {
+//                return new ContinueDownload(map.get(url));
+//            }
+//        } catch (IOException e) {
+//            return new MultiThreadDownload(map.get(url));
+//        }
+//        return new AlreadyDownloaded(map.get(url));
+//
+        return null;
     }
 
     private Task notSupportRangeType(String url) {
-        if (normalDownloadNotComplete(url)) {
-            return new NormalDownload(map.get(url));
-        } else {
-            return new AlreadyDownloaded(map.get(url));
-        }
+//        if (normalDownloadNotComplete(url)) {
+//            return new NormalDownload(map.get(url));
+//        } else {
+//            return new AlreadyDownloaded(map.get(url));
+//        }
+        return null;
     }
 
     private boolean multiDownloadNotComplete(String url) throws IOException {

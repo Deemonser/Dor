@@ -1,7 +1,10 @@
 package com.deemons.dor.download.task;
 
+import com.deemons.dor.download.constant.DownloadApi;
+import com.deemons.dor.download.db.DataBaseHelper;
 import com.deemons.dor.download.entity.Status;
-import com.deemons.dor.download.temporary.TemporaryRecord;
+import com.deemons.dor.download.file.FileHelper;
+import com.deemons.dor.download.temporary.TemporaryBean;
 
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
@@ -17,6 +20,10 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
+import static com.deemons.dor.download.constant.Flag.COMPLETED;
+import static com.deemons.dor.download.constant.Flag.FAILED;
+import static com.deemons.dor.download.constant.Flag.PAUSED;
+import static com.deemons.dor.download.constant.Flag.STARTED;
 import static com.deemons.dor.utils.ResponesUtils.log;
 
 /**
@@ -27,10 +34,13 @@ import static com.deemons.dor.utils.ResponesUtils.log;
 
 public abstract class Task {
 
-    protected TemporaryRecord record;
+    protected TemporaryBean mBean;
+    protected DataBaseHelper dataBaseHelper;
+    protected FileHelper mFileHelper;
+    protected DownloadApi mApi;
 
-    protected Task(TemporaryRecord record) {
-        this.record = record;
+    protected Task(TemporaryBean mBean) {
+        this.mBean = mBean;
     }
 
     public void prepareDownload() throws IOException, ParseException {
@@ -45,7 +55,7 @@ public abstract class Task {
                     @Override
                     public void accept(Subscription subscription) throws Exception {
                         log(startLog());
-                        record.start();
+                        start();
                     }
                 })
                 .flatMap(new Function<Integer, Publisher<Status>>() {
@@ -62,7 +72,7 @@ public abstract class Task {
                             log("Thread: " + Thread.currentThread().getName() + " update DB: " + status.downloadSize);
                             downloadSize = status.downloadSize;
                         }
-                        record.update(status);
+                        update(status);
                         return status;
                     }
                 })
@@ -70,28 +80,28 @@ public abstract class Task {
                     @Override
                     public void accept(Throwable throwable) throws Exception {
                         log(errorLog());
-                        record.error();
+                        error();
                     }
                 })
                 .doOnComplete(new Action() {
                     @Override
                     public void run() throws Exception {
                         log(completeLog());
-                        record.complete();
+                        complete();
                     }
                 })
                 .doOnCancel(new Action() {
                     @Override
                     public void run() throws Exception {
                         log(cancelLog());
-                        record.cancel();
+                        cancel();
                     }
                 })
                 .doFinally(new Action() {
                     @Override
                     public void run() throws Exception {
                         log(finishLog());
-                        record.finish();
+                        finish();
                     }
                 })
                 .toObservable();
@@ -123,5 +133,34 @@ public abstract class Task {
         return "";
     }
 
+
+
+    public void start() {
+        if (dataBaseHelper.recordNotExists(mBean.bean.url)) {
+            dataBaseHelper.insertRecord(mBean.bean, STARTED);
+        } else {
+            dataBaseHelper.updateRecord(mBean.bean.url, mBean.bean.saveName, mBean.bean.savePath, STARTED);
+        }
+    }
+
+    public void update(Status status) {
+        dataBaseHelper.updateStatus(mBean.bean.url, status);
+    }
+
+    public void error() {
+        dataBaseHelper.updateRecord(mBean.bean.url, FAILED);
+    }
+
+    public void complete() {
+        dataBaseHelper.updateRecord(mBean.bean.url, COMPLETED);
+    }
+
+    public void cancel() {
+        dataBaseHelper.updateRecord(mBean.bean.url, PAUSED);
+    }
+
+    public void finish() {
+        dataBaseHelper.closeDataBase();
+    }
 
 }

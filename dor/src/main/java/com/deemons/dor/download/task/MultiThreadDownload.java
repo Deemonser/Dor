@@ -1,6 +1,6 @@
 package com.deemons.dor.download.task;
 
-import com.deemons.dor.download.temporary.TemporaryRecord;
+import com.deemons.dor.download.temporary.TemporaryBean;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -20,14 +20,19 @@ import static com.deemons.dor.download.constant.Constant.MULTITHREADING_DOWNLOAD
 
 public class MultiThreadDownload extends ContinueDownload {
 
-    public MultiThreadDownload(TemporaryRecord record) {
+    public MultiThreadDownload(TemporaryBean record) {
         super(record);
     }
 
     @Override
     public void prepareDownload() throws IOException, ParseException {
         super.prepareDownload();
-        record.prepareRangeDownload();
+        mFileHelper.prepareDownload(
+                mBean.lastModifyFile(),
+                mBean.tempFile(),
+                mBean.file(),
+                mBean.contentLength,
+                mBean.lastModify);
     }
 
     @Override

@@ -70,7 +70,7 @@ public class DataBaseHelper {
     }
 
     /**
-     * Judge the url's record exists.
+     * Judge the url's mBean exists.
      *
      * @param url url
      * @return true if not exists
@@ -252,12 +252,12 @@ public class DataBaseHelper {
     }
 
     /**
-     * Read the url's record.
+     * Read the url's mBean.
      * <p>
-     * If record not exists, return an empty record.
+     * If mBean not exists, return an empty mBean.
      *
      * @param url url
-     * @return record
+     * @return mBean
      */
     public Observable<DownloadRecord> readRecord(final String url) {
         return Observable

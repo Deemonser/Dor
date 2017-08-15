@@ -119,7 +119,7 @@ public class TemporaryRecord {
     }
 
     /**
-     * Read download range from record file.
+     * Read download range from mBean file.
      *
      * @param index index
      * @return
@@ -292,6 +292,6 @@ public class TemporaryRecord {
     }
 
     public void finish() {
-        //        dataBaseHelper.closeDataBase();
+                dataBaseHelper.closeDataBase();
     }
 }

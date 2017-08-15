@@ -156,7 +156,7 @@ public class DownloadHelper {
     }
 
     /**
-     * Add a temporary record to the record recordTable.
+     * Add a temporary mBean to the mBean recordTable.
      *
      * @param bean download bean
      */

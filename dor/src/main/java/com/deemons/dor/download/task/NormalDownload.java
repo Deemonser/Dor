@@ -1,7 +1,7 @@
 package com.deemons.dor.download.task;
 
 import com.deemons.dor.download.entity.Status;
-import com.deemons.dor.download.temporary.TemporaryRecord;
+import com.deemons.dor.download.temporary.TemporaryBean;
 import com.deemons.dor.utils.ResponesUtils;
 
 import org.reactivestreams.Publisher;
@@ -33,26 +33,26 @@ import static com.deemons.dor.download.constant.Constant.NORMAL_RETRY_HINT;
 
 public class NormalDownload extends Task {
 
-    public NormalDownload(TemporaryRecord record) {
+    public NormalDownload(TemporaryBean record) {
         super(record);
     }
 
     @Override
     public void prepareDownload() throws IOException, ParseException {
         super.prepareDownload();
-        record.prepareNormalDownload();
+        mFileHelper.prepareDownload(mBean.lastModifyFile(), mBean.file(), mBean.contentLength, mBean.lastModify);
     }
 
     @Override
     protected Publisher<Status> download() {
-        return record.download()
+        return mApi.download(null, mBean.bean.url)
                 .flatMap(new Function<Response<ResponseBody>, Publisher<Status>>() {
                     @Override
                     public Publisher<Status> apply(Response<ResponseBody> response) throws Exception {
                         return save(response);
                     }
                 })
-                .compose(ResponesUtils.<Status>retry2(NORMAL_RETRY_HINT, record.getMaxRetryCount()));
+                .compose(ResponesUtils.<Status>retry2(NORMAL_RETRY_HINT, mBean.maxRetryCount));
     }
 
     @Override
@@ -89,7 +89,7 @@ public class NormalDownload extends Task {
         return Flowable.create(new FlowableOnSubscribe<Status>() {
             @Override
             public void subscribe(FlowableEmitter<Status> e) throws Exception {
-                record.save(e, response);
+                mFileHelper.saveFile(e, mBean.file(), response);
             }
         }, BackpressureStrategy.LATEST);
     }
