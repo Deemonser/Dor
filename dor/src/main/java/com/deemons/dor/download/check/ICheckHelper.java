@@ -1,7 +1,7 @@
 package com.deemons.dor.download.check;
 
 import com.deemons.dor.download.entity.DownloadBean;
-import com.deemons.dor.download.task.Task;
+import com.deemons.dor.download.temporary.TemporaryBean;
 
 import io.reactivex.Observable;
 
@@ -13,7 +13,7 @@ import io.reactivex.Observable;
 
 public interface ICheckHelper {
 
-    Observable<Task> dispatchCheck(DownloadBean downloadBean);
+    Observable<TemporaryBean> dispatchCheck(DownloadBean downloadBean);
 
 
 

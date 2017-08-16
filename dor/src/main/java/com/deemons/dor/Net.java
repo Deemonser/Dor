@@ -8,7 +8,9 @@ import android.text.TextUtils;
 import com.deemons.dor.cookie.PersistentCookieJar;
 import com.deemons.dor.cookie.cache.MemoryCookieCache;
 import com.deemons.dor.cookie.persistence.SharedPrefsCookiePersistor;
-import com.deemons.dor.download.RxDownload;
+import com.deemons.dor.download.Manager;
+import com.deemons.dor.download.entity.DownloadBean;
+import com.deemons.dor.download.entity.Status;
 import com.deemons.dor.utils.CheckUtils;
 
 import java.io.File;
@@ -24,6 +26,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 
+import io.reactivex.Observable;
 import io.rx_cache2.internal.RxCache;
 import io.victoralbertos.jolyglot.GsonSpeaker;
 import okhttp3.CertificatePinner;
@@ -75,14 +78,13 @@ public final class Net {
     private CookieJar cookieJar;
     private Retrofit retrofit;
     private RxCache rxCache;
-    private RxDownload mDownload;
+    private Manager mDownload;
 
 
     /**
      * Net 初始化
      *
      * @param context ApplicationContext
-     *
      */
     public static void init(Context context) {
         init(builder().context(context));
@@ -126,9 +128,60 @@ public final class Net {
         return net.retrofit;
     }
 
-    public static RxDownload getDownload() {
+    public static Manager getDownload() {
         CheckUtils.checkNotNull(net, "Pleas init Net first!");
         return net.mDownload;
+    }
+
+
+    /**
+     * Normal download.
+     * <p>
+     * Will save the download records in the database.
+     * <p>
+     * Un subscribe will pause download.
+     *
+     * @param url Url
+     * @return Observable<DownloadStatus>
+     */
+    public static Observable<Status> download(String url) {
+        return download(url, null);
+    }
+
+    /**
+     * Normal download with assigned Name.
+     *
+     * @param url      url
+     * @param saveName SaveName
+     * @return Observable<DownloadStatus>
+     */
+    public static Observable<Status> download(String url, String saveName) {
+        return download(url, saveName, null);
+    }
+
+    /**
+     * Normal download with assigned name and path.
+     *
+     * @param url      url
+     * @param saveName SaveName
+     * @param savePath SavePath
+     * @return Observable<DownloadStatus>
+     */
+    public static Observable<Status> download(String url, String saveName, String savePath) {
+        return download(new DownloadBean.Builder(url).setSaveName(saveName)
+                .setSavePath(savePath).build());
+    }
+
+    /**
+     * Normal download.
+     * <p>
+     * You can construct a DownloadBean to save extra data to the database.
+     *
+     * @param downloadBean download bean.
+     * @return Observable<DownloadStatus>
+     */
+    public  static Observable<Status> download(DownloadBean downloadBean) {
+        return getDownload().download(downloadBean);
     }
 
     public static <T> T getService(Class<T> service) {
@@ -160,7 +213,7 @@ public final class Net {
         retrofit = initRetrofit();
         rxCache = initRxCache();
 
-        mDownload = RxDownload.init(context, retrofit);
+        mDownload = new Manager(context, retrofit);
     }
 
 
@@ -254,10 +307,6 @@ public final class Net {
                 .connectTimeout(getConnectTimeout(), TimeUnit.MILLISECONDS)
                 .readTimeout(getReadTimeout(), TimeUnit.MILLISECONDS)
                 .cookieJar(getCookieJar());
-
-
-
-
 
 
         //addNetworkInterceptor 与 addInterceptor 的区别见下

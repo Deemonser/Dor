@@ -1,6 +1,7 @@
 package com.deemons.dor.download.temporary;
 
 import com.deemons.dor.download.entity.DownloadBean;
+import com.deemons.dor.download.load.DownloadType;
 
 import java.io.File;
 
@@ -29,6 +30,9 @@ public class TemporaryBean {
     public String tempPath;
     public String lmfPath;
 
+    private
+    @DownloadType.Type
+    int mDownloadType;
 
     public TemporaryBean(DownloadBean bean) {
         this.bean = bean;
@@ -47,4 +51,16 @@ public class TemporaryBean {
     public File lastModifyFile() {
         return new File(lmfPath);
     }
+
+
+    public void setDownloadType(@DownloadType.Type int type) {
+        mDownloadType = type;
+    }
+
+    @DownloadType.Type
+    public int getDownLoadType() {
+        return mDownloadType;
+    }
+
+
 }

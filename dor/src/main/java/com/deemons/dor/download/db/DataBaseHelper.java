@@ -69,6 +69,13 @@ public class DataBaseHelper {
         return singleton;
     }
 
+    public static DataBaseHelper getSingleton() {
+        if (singleton == null) {
+            throw new NullPointerException("DataBaseHelper is not init");
+        }
+        return singleton;
+    }
+
     /**
      * Judge the url's mBean exists.
      *

@@ -1,7 +1,7 @@
 package com.deemons.dor.download.load;
 
 import com.deemons.dor.download.entity.Status;
-import com.deemons.dor.download.task.Task;
+import com.deemons.dor.download.temporary.TemporaryBean;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -16,11 +16,8 @@ import io.reactivex.Observable;
 
 public interface ILoadHelper {
 
-    Observable<Status> dispatchDownload(Task task) throws IOException, ParseException;
+    Observable<Status> dispatchDownload(TemporaryBean temporaryBean) throws IOException, ParseException;
 
-    void checkRange();
 
-    void multiThreadLoad();
 
-    void singleThreadLoad();
 }

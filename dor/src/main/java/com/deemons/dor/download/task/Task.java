@@ -39,11 +39,8 @@ public abstract class Task {
     protected FileHelper mFileHelper;
     protected DownloadApi mApi;
 
-    public Task(TemporaryBean mBean, DataBaseHelper dataBaseHelper, FileHelper mFileHelper, DownloadApi mApi) {
+    public Task(TemporaryBean mBean) {
         this.mBean = mBean;
-        this.dataBaseHelper = dataBaseHelper;
-        this.mFileHelper = mFileHelper;
-        this.mApi = mApi;
     }
 
 

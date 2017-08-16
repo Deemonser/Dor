@@ -1,15 +1,9 @@
 package com.deemons.dor.download.check;
 
-import android.text.TextUtils;
-
 import com.deemons.dor.download.constant.DownloadApi;
 import com.deemons.dor.download.entity.DownloadBean;
 import com.deemons.dor.download.file.FileHelper;
-import com.deemons.dor.download.task.AlreadyDownloaded;
-import com.deemons.dor.download.task.ContinueDownload;
-import com.deemons.dor.download.task.MultiThreadDownload;
-import com.deemons.dor.download.task.NormalDownload;
-import com.deemons.dor.download.task.Task;
+import com.deemons.dor.download.load.DownloadType;
 import com.deemons.dor.download.temporary.TemporaryBean;
 
 import java.io.File;
@@ -24,8 +18,6 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import retrofit2.Response;
 
-import static android.os.Environment.DIRECTORY_DOWNLOADS;
-import static android.os.Environment.getExternalStoragePublicDirectory;
 import static android.text.TextUtils.concat;
 import static com.deemons.dor.download.constant.Constant.CACHE;
 import static com.deemons.dor.download.constant.Constant.DOWNLOAD_RECORD_FILE_DAMAGED;
@@ -53,8 +45,6 @@ import static java.io.File.separator;
 
 public class CheckHelper implements ICheckHelper {
 
-    private static final int defaultMaxRetryCont = 3;
-    private static final int defaultMaxThreads = 7;
 
     private FileHelper mFileHelper;
     private DownloadApi mApi;
@@ -64,34 +54,18 @@ public class CheckHelper implements ICheckHelper {
 
     private String savePath;
 
-    public CheckHelper(DownloadApi api) {
-        this(api, null);
-    }
 
-    public CheckHelper(DownloadApi api, String savePath) {
-        this(api, savePath, defaultMaxRetryCont);
-    }
-
-    public CheckHelper(DownloadApi api, String savePath, int maxRetryCount) {
-        this(api, savePath, maxRetryCount, defaultMaxThreads);
-    }
-
-    public CheckHelper(DownloadApi api, String savePath, int maxRetryCount, int maxThreads) {
+    public CheckHelper(FileHelper fileHelper, DownloadApi api, String savePath, int maxRetryCount, int maxThreads) {
         mApi = api;
         this.maxRetryCount = maxRetryCount;
         this.maxThreads = maxThreads;
+        this.savePath = savePath;
 
-        if (TextUtils.isEmpty(savePath)) {
-            this.savePath = getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS).getPath();
-        } else {
-            this.savePath = savePath;
-        }
-
-        mFileHelper = new FileHelper(maxThreads);
+        mFileHelper = fileHelper;
     }
 
     @Override
-    public Observable<Task> dispatchCheck(DownloadBean downloadBean) {
+    public Observable<TemporaryBean> dispatchCheck(DownloadBean downloadBean) {
         return Observable.just(downloadBean)
                 .map(new Function<DownloadBean, TemporaryBean>() {
                     @Override
@@ -99,9 +73,9 @@ public class CheckHelper implements ICheckHelper {
                         return getTemporary(downloadBean);
                     }
                 })
-                .flatMap(new Function<TemporaryBean, ObservableSource<Task>>() {
+                .flatMap(new Function<TemporaryBean, ObservableSource<TemporaryBean>>() {
                     @Override
-                    public ObservableSource<Task> apply(TemporaryBean bean) throws Exception {
+                    public ObservableSource<TemporaryBean> apply(TemporaryBean bean) throws Exception {
                         return getDownloadType(bean);
                     }
                 });
@@ -116,7 +90,7 @@ public class CheckHelper implements ICheckHelper {
      * @param bean
      * @return download type
      */
-    private Observable<Task> getDownloadType(final TemporaryBean bean) {
+    private Observable<TemporaryBean> getDownloadType(final TemporaryBean bean) {
         return Observable.just(bean)
                 .flatMap(new Function<TemporaryBean, ObservableSource<TemporaryBean>>() {
                     @Override
@@ -131,9 +105,9 @@ public class CheckHelper implements ICheckHelper {
                         return checkRange(temporaryBean);
                     }
                 })
-                .flatMap(new Function<TemporaryBean, ObservableSource<Task>>() {
+                .flatMap(new Function<TemporaryBean, ObservableSource<TemporaryBean>>() {
                     @Override
-                    public ObservableSource<Task> apply(TemporaryBean temporaryBean) throws Exception {
+                    public ObservableSource<TemporaryBean> apply(TemporaryBean temporaryBean) throws Exception {
                         return temporaryBean.file().exists() ? existsType(temporaryBean) : nonExistsType(temporaryBean);
                     }
                 });
@@ -146,11 +120,11 @@ public class CheckHelper implements ICheckHelper {
      * @param temporaryBean
      * @return Download Type
      */
-    private Observable<Task> nonExistsType(TemporaryBean temporaryBean) {
+    private Observable<TemporaryBean> nonExistsType(TemporaryBean temporaryBean) {
         return Observable.just(temporaryBean)
-                .flatMap(new Function<TemporaryBean, ObservableSource<Task>>() {
+                .flatMap(new Function<TemporaryBean, ObservableSource<TemporaryBean>>() {
                     @Override
-                    public ObservableSource<Task> apply(TemporaryBean bean)
+                    public ObservableSource<TemporaryBean> apply(TemporaryBean bean)
                             throws Exception {
                         return Observable.just(generateNonExistsType(bean));
                     }
@@ -163,12 +137,12 @@ public class CheckHelper implements ICheckHelper {
      * @param temporaryBean
      * @return Download Type
      */
-    private Observable<Task> existsType(TemporaryBean temporaryBean) {
+    private Observable<TemporaryBean> existsType(TemporaryBean temporaryBean) {
         return Observable.just(temporaryBean)
                 .map(new Function<TemporaryBean, TemporaryBean>() {
                     @Override
                     public TemporaryBean apply(TemporaryBean bean) throws Exception {
-                        bean.lastModify = mFileHelper.readLastModify(bean.lastModifyFile());
+                        bean.lastModify = readLastModify(bean);
                         return bean;
                     }
                 })
@@ -178,23 +152,28 @@ public class CheckHelper implements ICheckHelper {
                         return checkFileUpdate(bean);
                     }
                 })
-                .flatMap(new Function<TemporaryBean, ObservableSource<Task>>() {
+                .flatMap(new Function<TemporaryBean, ObservableSource<TemporaryBean>>() {
                     @Override
-                    public ObservableSource<Task> apply(TemporaryBean bean)
+                    public ObservableSource<TemporaryBean> apply(TemporaryBean bean)
                             throws Exception {
                         return Observable.just(generateFileExistsType(bean));
                     }
                 });
     }
 
-
-    private boolean checkFileExist(TemporaryBean bean) {
-        return bean.file().exists();
+    private String readLastModify(TemporaryBean bean)  {
+        try {
+            return mFileHelper.readLastModify(bean.lastModifyFile());
+        } catch (IOException e) {
+            //If read failed,return an empty string.
+            //If we send empty last-modify,server will response 200.
+            //That means file changed.
+            return "";
+        }
     }
 
-    public Observable<TemporaryBean> checkFileWhole(TemporaryBean bean) {
-        return null;
-    }
+
+
 
     public Observable<TemporaryBean> checkFileUpdate(final TemporaryBean bean) {
         return mApi.checkFileByHead(bean.lastModify, bean.bean.url)
@@ -211,9 +190,6 @@ public class CheckHelper implements ICheckHelper {
                     }
                 });
     }
-
-
-
 
 
     /**
@@ -365,7 +341,7 @@ public class CheckHelper implements ICheckHelper {
      * @param bean TemporaryBean
      * @return download type
      */
-    public Task generateNonExistsType(TemporaryBean bean) {
+    public TemporaryBean generateNonExistsType(TemporaryBean bean) {
         return getNormalType(bean);
     }
 
@@ -375,33 +351,22 @@ public class CheckHelper implements ICheckHelper {
      * @param bean TemporaryBean
      * @return download type
      */
-    public Task generateFileExistsType(TemporaryBean bean) {
-        Task type;
-        if (bean.serverFileChanged) {
-            type = getNormalType(bean);
-        } else {
-            type = getServerFileChangeType(bean);
-        }
-        return type;
+    public TemporaryBean generateFileExistsType(TemporaryBean bean) {
+        return bean.serverFileChanged ? getNormalType(bean) : getServerFileChangeType(bean);
     }
 
 
-    private Task getNormalType(TemporaryBean bean) {
-        Task type;
+    private TemporaryBean getNormalType(TemporaryBean bean) {
         if (bean.rangeSupport) {
-            type = new MultiThreadDownload(bean);
+            bean.setDownloadType(DownloadType.MULTI_THREAD);
         } else {
-            type = new NormalDownload(bean);
+            bean.setDownloadType(DownloadType.NORMAL);
         }
-        return type;
+        return bean;
     }
 
-    private Task getServerFileChangeType(TemporaryBean bean) {
-        if (bean.rangeSupport) {
-            return supportRangeType(bean);
-        } else {
-            return notSupportRangeType(bean);
-        }
+    private TemporaryBean getServerFileChangeType(TemporaryBean bean) {
+        return bean.rangeSupport ? supportRangeType(bean) : notSupportRangeType(bean);
     }
 
 
@@ -410,27 +375,28 @@ public class CheckHelper implements ICheckHelper {
     }
 
 
-    private Task supportRangeType(TemporaryBean bean) {
+    private TemporaryBean supportRangeType(TemporaryBean bean) {
         if (needReDownload(bean)) {
-            return new MultiThreadDownload(bean);
+            bean.setDownloadType(DownloadType.MULTI_THREAD);
+            return bean;
         }
         try {
             if (multiDownloadNotComplete(bean)) {
-                return new ContinueDownload(bean);
+                bean.setDownloadType(DownloadType.CONTINUE);
+                return bean;
             }
         } catch (IOException e) {
-            return new MultiThreadDownload(bean);
+            bean.setDownloadType(DownloadType.MULTI_THREAD);
+            return bean;
         }
-        return new AlreadyDownloaded(bean);
+        bean.setDownloadType(DownloadType.ALREADY);
+        return bean;
     }
 
 
-    private Task notSupportRangeType(TemporaryBean bean) {
-        if (normalDownloadNotComplete(bean)) {
-            return new NormalDownload(bean);
-        } else {
-            return new AlreadyDownloaded(bean);
-        }
+    private TemporaryBean notSupportRangeType(TemporaryBean bean) {
+        bean.setDownloadType(normalDownloadNotComplete(bean) ? DownloadType.NORMAL : DownloadType.ALREADY);
+        return bean;
     }
 
     private boolean multiDownloadNotComplete(TemporaryBean bean) throws IOException {
