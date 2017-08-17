@@ -1,7 +1,7 @@
 package com.deemons.dor.download.entity;
 
 
-import com.deemons.dor.download.constant.Flag;
+import static com.deemons.dor.download.constant.Flag.NORMAL;
 
 /**
  * 创建者      chenghaohao
@@ -12,12 +12,13 @@ import com.deemons.dor.download.constant.Flag;
 
 public class Status {
 
-    public Flag mFlag;
+    public int mFlag = NORMAL;
 
     public boolean isChunked;
     public long totalSize;
     public long downloadSize;
-    public long speed;
+    public long startTimeStamp;
+    public String speed;
 
     public Status() {
     }
@@ -39,8 +40,8 @@ public class Status {
         return "Status{" +
                 "mFlag=" + mFlag +
                 ", isChunked=" + isChunked +
-                ", totalSize=" + totalSize +
-                ", downloadSize=" + downloadSize +
+                ", progress=" + downloadSize * 100f / totalSize +
+                ", speed='" + speed + '\'' +
                 '}';
     }
 }

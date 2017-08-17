@@ -57,14 +57,15 @@ import static java.util.TimeZone.getTimeZone;
  * 工具类
  */
 public class ResponesUtils {
-    private static boolean DEBUG = false;
+    private static boolean DEBUG = true;
 
     public static void setDebug(boolean flag) {
         DEBUG = flag;
     }
 
     public static void log(String message) {
-        if (empty(message)) return;
+        if (empty(message))
+            return;
         if (DEBUG) {
             Log.i(TAG, message);
         }
@@ -133,16 +134,16 @@ public class ResponesUtils {
         }
     }
 
-//    public static FlowableProcessor<DownloadEvent> createProcessor(
-//            String missionId, Map<String, FlowableProcessor<DownloadEvent>> processorMap) {
-//
-//        if (processorMap.get(missionId) == null) {
-//            FlowableProcessor<DownloadEvent> processor =
-//                    BehaviorProcessor.<DownloadEvent>create().toSerialized();
-//            processorMap.put(missionId, processor);
-//        }
-//        return processorMap.get(missionId);
-//    }
+    //    public static FlowableProcessor<DownloadEvent> createProcessor(
+    //            String missionId, Map<String, FlowableProcessor<DownloadEvent>> processorMap) {
+    //
+    //        if (processorMap.get(missionId) == null) {
+    //            FlowableProcessor<DownloadEvent> processor =
+    //                    BehaviorProcessor.<DownloadEvent>create().toSerialized();
+    //            processorMap.put(missionId, processor);
+    //        }
+    //        return processorMap.get(missionId);
+    //    }
 
     public static <U> ObservableTransformer<U, U> retry(final String hint, final int retryCount) {
         return new ObservableTransformer<U, U>() {
@@ -191,6 +192,11 @@ public class ResponesUtils {
         if (empty(fileName)) {
             fileName = url.substring(url.lastIndexOf('/') + 1);
         }
+
+        if (fileName.contains("?")) {
+            fileName = fileName.split("[?]")[0];
+        }
+
         if (fileName.startsWith("\"")) {
             fileName = fileName.substring(1);
         }

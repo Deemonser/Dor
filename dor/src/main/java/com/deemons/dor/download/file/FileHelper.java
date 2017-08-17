@@ -1,5 +1,7 @@
 package com.deemons.dor.download.file;
 
+import android.net.TrafficStats;
+
 import com.deemons.dor.download.entity.DownloadRange;
 import com.deemons.dor.download.entity.Status;
 import com.deemons.dor.utils.ResponesUtils;
@@ -46,9 +48,11 @@ public class FileHelper {
     //|  ...     |     ...  | maxThreads-1
     //|*********************|
     private int maxThreads;
+    private int uid;
 
-    public FileHelper(int maxThreads) {
+    public FileHelper(int maxThreads, int uid) {
         this.maxThreads = maxThreads;
+        this.uid = uid;
         RECORD_FILE_TOTAL_SIZE = EACH_RECORD_SIZE * maxThreads;
     }
 
@@ -124,6 +128,7 @@ public class FileHelper {
                 byte[] buffer = new byte[2048];
 
                 Status status = new Status();
+                status.startTimeStamp = lastTimeStamp;
                 record = new RandomAccessFile(tempFile, ACCESS);
                 recordChannel = record.getChannel();
                 MappedByteBuffer recordBuffer = recordChannel
@@ -153,6 +158,7 @@ public class FileHelper {
                     saveBuffer.put(buffer, 0, readLen);
                     recordBuffer.putLong(startIndex, start);
                     status.downloadSize = totalSize - getResidue(recordBuffer);
+
                     emitter.onNext(status);
                 }
                 emitter.onComplete();
@@ -167,6 +173,32 @@ public class FileHelper {
         } catch (IOException e) {
             emitter.onError(e);
         }
+    }
+
+
+    long lastTotalRxBytes = 0L;
+    long lastTimeStamp = 0L;
+    long nowTotalRxBytes;
+    long nowTimeStamp;
+    long speed;
+
+    public Status getDownloadSpeed(Status status) {
+        if (lastTimeStamp == 0) {
+            lastTimeStamp = status.startTimeStamp;
+        }
+
+        nowTotalRxBytes = TrafficStats.getUidRxBytes(uid) == TrafficStats.UNSUPPORTED ? 0 : TrafficStats.getTotalRxBytes();
+        nowTimeStamp = System.currentTimeMillis();
+        speed = ((nowTotalRxBytes - lastTotalRxBytes) * 1000 / (nowTimeStamp - lastTimeStamp));//毫秒转换
+
+
+        status.speed = ResponesUtils.formatSize(speed);
+
+        lastTotalRxBytes = nowTotalRxBytes;
+        lastTimeStamp = nowTimeStamp;
+
+        return status;
+
     }
 
     public boolean fileNotComplete(File tempFile) throws IOException {
@@ -323,15 +355,6 @@ public class FileHelper {
         }
         return residue;
     }
-
-
-
-
-
-
-
-
-
 
 
 }

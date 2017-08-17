@@ -36,14 +36,15 @@ import static android.os.Environment.getExternalStoragePublicDirectory;
 public class Manager {
 
     private static final int DEFAULT_MAX_RETRY_CONT = 3;
-    private static final int DEFAULT_MAX_THREADS = 4;
+    private static final int DEFAULT_MAX_THREADS = 3;
 
     private final ICheckHelper mCheckHelper;
     private final  ILoadHelper mLoadHelper;
 
+
     public Manager(Context context, Retrofit retrofit) {
         DataBaseHelper dataBaseHelper = DataBaseHelper.getSingleton(context);
-        FileHelper fileHelper = new FileHelper(getMaxThreads());
+        FileHelper fileHelper = new FileHelper(getMaxThreads(),context.getApplicationInfo().uid);
 
         DownloadApi downloadApi = retrofit.create(DownloadApi.class);
         mCheckHelper = new CheckHelper(fileHelper,

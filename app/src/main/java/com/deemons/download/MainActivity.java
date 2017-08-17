@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onComplete() {
-
+                        Log.d("MainActivity","onComplete");
                     }
                 });
 

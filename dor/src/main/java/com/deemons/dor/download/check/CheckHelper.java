@@ -1,5 +1,7 @@
 package com.deemons.dor.download.check;
 
+import android.util.Log;
+
 import com.deemons.dor.download.constant.DownloadApi;
 import com.deemons.dor.download.entity.DownloadBean;
 import com.deemons.dor.download.file.FileHelper;
@@ -10,8 +12,6 @@ import java.io.File;
 import java.io.IOException;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.ObservableSource;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.functions.Consumer;
@@ -161,7 +161,7 @@ public class CheckHelper implements ICheckHelper {
                 });
     }
 
-    private String readLastModify(TemporaryBean bean)  {
+    private String readLastModify(TemporaryBean bean) {
         try {
             return mFileHelper.readLastModify(bean.lastModifyFile());
         } catch (IOException e) {
@@ -171,8 +171,6 @@ public class CheckHelper implements ICheckHelper {
             return "";
         }
     }
-
-
 
 
     public Observable<TemporaryBean> checkFileUpdate(final TemporaryBean bean) {
@@ -204,10 +202,14 @@ public class CheckHelper implements ICheckHelper {
                     @Override
                     public ObservableSource<Object> apply(@NonNull Response<Void> resp)
                             throws Exception {
+
+                        Log.d("CheckHelper", "checkUrl()");
+
                         if (!resp.isSuccessful()) {
                             return checkUrlByGet(bean);
                         } else {
-                            return saveFileInfo(bean.bean.url, resp);
+                            saveFileInfo(bean, resp);
+                            return Observable.just(new Object());
                         }
                     }
                 })
@@ -220,26 +222,17 @@ public class CheckHelper implements ICheckHelper {
                 });
     }
 
-    private ObservableSource<Object> saveFileInfo(final String url, final Response<Void> resp) {
-        return Observable.create(new ObservableOnSubscribe<Object>() {
-            @Override
-            public void subscribe(ObservableEmitter<Object> emitter) throws Exception {
-                saveFileInfo(url, resp);
-                emitter.onNext(new Object());
-                emitter.onComplete();
-            }
-        });
-    }
 
     private ObservableSource<Object> checkUrlByGet(final TemporaryBean bean) {
         return mApi.checkByGet(bean.bean.url)
                 .doOnNext(new Consumer<Response<Void>>() {
                     @Override
                     public void accept(Response<Void> response) throws Exception {
+                        Log.d("CheckHelper", "checkUrlByGet()");
                         if (!response.isSuccessful()) {
                             throw new IllegalArgumentException(formatStr(URL_ILLEGAL, bean.bean.url));
                         } else {
-                            saveFileInfo(bean.bean.url, response);
+                            saveFileInfo(bean, response);
                         }
                     }
                 })
@@ -259,7 +252,6 @@ public class CheckHelper implements ICheckHelper {
                     @Override
                     public void accept(@NonNull Response<Void> voidResponse) throws Exception {
                         saveRangeInfo(bean, voidResponse);
-                        saveFileInfo(bean, voidResponse);
                     }
                 })
                 .compose(retry(REQUEST_RETRY_HINT, bean.maxRetryCount))
@@ -287,10 +279,7 @@ public class CheckHelper implements ICheckHelper {
         String cachePath = concat(realSavePath, separator, CACHE).toString();
         mkdirs(realSavePath, cachePath);
 
-        String[] paths = getPaths(downloadBean.saveName, realSavePath);
-        temporaryBean.filePath = paths[0];
-        temporaryBean.tempPath = paths[1];
-        temporaryBean.lmfPath = paths[2];
+
         return temporaryBean;
     }
 
@@ -307,7 +296,13 @@ public class CheckHelper implements ICheckHelper {
         }
         temporaryBean.contentLength = contentLength(response);
         temporaryBean.lastModify = lastModify(response);
+
+        String[] paths = getPaths(temporaryBean.bean.saveName, temporaryBean.bean.savePath);
+        temporaryBean.filePath = paths[0];
+        temporaryBean.tempPath = paths[1];
+        temporaryBean.lmfPath = paths[2];
     }
+
 
     /**
      * Save range info
@@ -369,10 +364,6 @@ public class CheckHelper implements ICheckHelper {
         return bean.rangeSupport ? supportRangeType(bean) : notSupportRangeType(bean);
     }
 
-
-    private boolean fileChanged(TemporaryBean bean) {
-        return bean.serverFileChanged;
-    }
 
 
     private TemporaryBean supportRangeType(TemporaryBean bean) {

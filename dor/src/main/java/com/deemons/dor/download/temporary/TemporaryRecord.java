@@ -79,7 +79,7 @@ public class TemporaryRecord {
         this.maxRetryCount = maxRetryCount;
         this.downloadApi = downloadApi;
         this.dataBaseHelper = dataBaseHelper;
-        this.fileHelper = new FileHelper(maxThreads);
+//        this.fileHelper = new FileHelper(maxThreads);
 
         String realSavePath;
         if (empty(bean.savePath)) {

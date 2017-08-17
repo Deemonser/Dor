@@ -56,6 +56,7 @@ public class LoadHelper implements ILoadHelper {
     private DataBaseHelper dataBaseHelper;
     private FileHelper mFileHelper;
     private DownloadApi mApi;
+    private boolean showSpeed;
     long downloadSize = 0;
 
 
@@ -119,6 +120,13 @@ public class LoadHelper implements ILoadHelper {
                         return download(bean);
                     }
                 })
+                .throttleFirst(1000, TimeUnit.MILLISECONDS)
+                .map(new Function<Status, Status>() {
+                    @Override
+                    public Status apply(@NonNull Status status) throws Exception {
+                        return showSpeed ? mFileHelper.getDownloadSpeed(status) : status;
+                    }
+                })
                 .observeOn(Schedulers.io())
                 .map(new Function<Status, Status>() {
                     @Override
@@ -127,7 +135,7 @@ public class LoadHelper implements ILoadHelper {
                             log("Thread: " + Thread.currentThread().getName() + " update DB: " + status.downloadSize);
                             downloadSize = status.downloadSize;
                         }
-                        update(status,temporaryBean);
+                        update(status, temporaryBean);
                         return status;
                     }
                 })
@@ -199,7 +207,7 @@ public class LoadHelper implements ILoadHelper {
                 .flatMap(new Function<Response<ResponseBody>, Publisher<Status>>() {
                     @Override
                     public Publisher<Status> apply(Response<ResponseBody> response) throws Exception {
-                        return save(response,bean);
+                        return save(response, bean);
                     }
                 })
                 .compose(ResponesUtils.<Status>retry2(NORMAL_RETRY_HINT, bean.maxRetryCount));
@@ -334,5 +342,6 @@ public class LoadHelper implements ILoadHelper {
     protected String finishLog() {
         return "finishLog";
     }
+
 
 }
