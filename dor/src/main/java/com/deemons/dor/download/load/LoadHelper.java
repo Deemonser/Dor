@@ -56,7 +56,6 @@ public class LoadHelper implements ILoadHelper {
     private DataBaseHelper dataBaseHelper;
     private FileHelper mFileHelper;
     private DownloadApi mApi;
-    private boolean showSpeed;
     long downloadSize = 0;
 
 
@@ -121,16 +120,11 @@ public class LoadHelper implements ILoadHelper {
                     }
                 })
                 .throttleFirst(1000, TimeUnit.MILLISECONDS)
-                .map(new Function<Status, Status>() {
-                    @Override
-                    public Status apply(@NonNull Status status) throws Exception {
-                        return showSpeed ? mFileHelper.getDownloadSpeed(status) : status;
-                    }
-                })
                 .observeOn(Schedulers.io())
                 .map(new Function<Status, Status>() {
                     @Override
                     public Status apply(@NonNull Status status) throws Exception {
+                        status = mFileHelper.getDownloadSpeed(status);
                         if (status.downloadSize - downloadSize > 100000L) {
                             log("Thread: " + Thread.currentThread().getName() + " update DB: " + status.downloadSize);
                             downloadSize = status.downloadSize;
