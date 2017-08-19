@@ -1,6 +1,6 @@
 package com.deemons.dor.download.load;
 
-import com.deemons.dor.download.constant.DownloadApi;
+import com.deemons.dor.constant.Api;
 import com.deemons.dor.download.db.DataBaseHelper;
 import com.deemons.dor.download.entity.DownloadRange;
 import com.deemons.dor.download.entity.Status;
@@ -30,17 +30,17 @@ import io.reactivex.schedulers.Schedulers;
 import okhttp3.ResponseBody;
 import retrofit2.Response;
 
-import static com.deemons.dor.download.constant.Constant.ALREADY_DOWNLOAD_HINT;
-import static com.deemons.dor.download.constant.Constant.CONTINUE_DOWNLOAD_PREPARE;
-import static com.deemons.dor.download.constant.Constant.MULTITHREADING_DOWNLOAD_PREPARE;
-import static com.deemons.dor.download.constant.Constant.NORMAL_DOWNLOAD_PREPARE;
-import static com.deemons.dor.download.constant.Constant.NORMAL_RETRY_HINT;
-import static com.deemons.dor.download.constant.Constant.RANGE_DOWNLOAD_STARTED;
-import static com.deemons.dor.download.constant.Constant.RANGE_RETRY_HINT;
-import static com.deemons.dor.download.constant.Flag.COMPLETED;
-import static com.deemons.dor.download.constant.Flag.FAILED;
-import static com.deemons.dor.download.constant.Flag.PAUSED;
-import static com.deemons.dor.download.constant.Flag.STARTED;
+import static com.deemons.dor.constant.Constant.ALREADY_DOWNLOAD_HINT;
+import static com.deemons.dor.constant.Constant.CONTINUE_DOWNLOAD_PREPARE;
+import static com.deemons.dor.constant.Constant.MULTITHREADING_DOWNLOAD_PREPARE;
+import static com.deemons.dor.constant.Constant.NORMAL_DOWNLOAD_PREPARE;
+import static com.deemons.dor.constant.Constant.NORMAL_RETRY_HINT;
+import static com.deemons.dor.constant.Constant.RANGE_DOWNLOAD_STARTED;
+import static com.deemons.dor.constant.Constant.RANGE_RETRY_HINT;
+import static com.deemons.dor.constant.Flag.COMPLETED;
+import static com.deemons.dor.constant.Flag.FAILED;
+import static com.deemons.dor.constant.Flag.PAUSED;
+import static com.deemons.dor.constant.Flag.STARTED;
 import static com.deemons.dor.utils.ResponesUtils.formatStr;
 import static com.deemons.dor.utils.ResponesUtils.log;
 
@@ -55,11 +55,11 @@ public class LoadHelper implements ILoadHelper {
 
     private DataBaseHelper dataBaseHelper;
     private FileHelper mFileHelper;
-    private DownloadApi mApi;
+    private Api mApi;
     long downloadSize = 0;
 
 
-    public LoadHelper(DataBaseHelper dataBaseHelper, FileHelper fileHelper, DownloadApi api) {
+    public LoadHelper(DataBaseHelper dataBaseHelper, FileHelper fileHelper, Api api) {
         this.dataBaseHelper = dataBaseHelper;
         mFileHelper = fileHelper;
         mApi = api;

@@ -1,4 +1,4 @@
-package com.deemons.dor.download.constant;
+package com.deemons.dor.constant;
 
 /**
  * Author: Season(ssseasonnn@gmail.com)

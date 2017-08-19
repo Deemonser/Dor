@@ -1,7 +1,7 @@
 package com.deemons.dor.download.entity;
 
 
-import static com.deemons.dor.download.constant.Flag.NORMAL;
+import static com.deemons.dor.constant.Flag.NORMAL;
 
 /**
  * 创建者      chenghaohao
