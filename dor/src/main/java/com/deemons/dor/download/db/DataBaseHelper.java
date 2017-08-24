@@ -5,7 +5,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.Nullable;
 
-import com.deemons.dor.download.constant.Flag;
+import com.deemons.dor.constant.Flag;
 import com.deemons.dor.download.entity.DownloadBean;
 import com.deemons.dor.download.entity.DownloadRecord;
 import com.deemons.dor.download.entity.Status;
@@ -19,7 +19,7 @@ import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
-import static com.deemons.dor.download.constant.Flag.PAUSED;
+import static com.deemons.dor.constant.Flag.PAUSED;
 import static com.deemons.dor.download.db.Db.RecordTable.COLUMN_DATE;
 import static com.deemons.dor.download.db.Db.RecordTable.COLUMN_DOWNLOAD_FLAG;
 import static com.deemons.dor.download.db.Db.RecordTable.COLUMN_DOWNLOAD_SIZE;

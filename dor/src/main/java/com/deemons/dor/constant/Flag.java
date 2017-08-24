@@ -1,4 +1,4 @@
-package com.deemons.dor.download.constant;
+package com.deemons.dor.constant;
 
 /**
  * 创建者      chenghaohao

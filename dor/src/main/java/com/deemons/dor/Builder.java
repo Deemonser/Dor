@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import com.deemons.dor.utils.CheckUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.net.ssl.HostnameVerifier;
@@ -39,6 +40,7 @@ public class Builder {
     List<Interceptor> networkInterceptors = new ArrayList<>();
     List<CallAdapter.Factory> callAdapters = new ArrayList<>();
     List<Converter.Factory> converters = new ArrayList<>();
+    HashMap<String,String> headers;
     HttpLoggingInterceptor loggingInterceptor;
     SSLSocketFactory sSLSocketFactory;
     HostnameVerifier hostnameVerifier;
@@ -75,6 +77,15 @@ public class Builder {
      */
     public Builder context(@NonNull Context context) {
         this.context = context.getApplicationContext();
+        return this;
+    }
+
+
+    public Builder header(String name,String value) {
+        if (headers == null) {
+            headers = new HashMap<>();
+        }
+        headers.put(name, value);
         return this;
     }
 

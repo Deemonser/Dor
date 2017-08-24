@@ -10,6 +10,7 @@ import com.deemons.dor.cookie.persistence.SharedPrefsCookiePersistor;
 import com.deemons.dor.download.LoadManager;
 import com.deemons.dor.download.entity.DownloadBean;
 import com.deemons.dor.download.entity.Status;
+import com.deemons.dor.interceptor.AddHeaderInterceptor;
 import com.deemons.dor.utils.CheckUtils;
 
 import java.util.concurrent.TimeUnit;
@@ -55,8 +56,14 @@ public final class Dor {
 
     private Dor(Builder builder) {
 
+        //添加 增加 Header 拦截器
+        if (builder.headers != null) {
+            builder.interceptors.add(new AddHeaderInterceptor(builder.headers));
+        }
 
+        //添加 Log 拦截器
         builder.interceptors.add(builder.loggingInterceptor);
+
         retrofit = initRetrofit(builder);
 
         downloadBuilder = LoadManager.builder()

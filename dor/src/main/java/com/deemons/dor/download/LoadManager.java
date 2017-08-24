@@ -3,9 +3,9 @@ package com.deemons.dor.download;
 import android.content.Context;
 import android.text.TextUtils;
 
+import com.deemons.dor.constant.Api;
 import com.deemons.dor.download.check.CheckHelper;
 import com.deemons.dor.download.check.ICheckHelper;
-import com.deemons.dor.download.constant.DownloadApi;
 import com.deemons.dor.download.db.DataBaseHelper;
 import com.deemons.dor.download.entity.DownloadBean;
 import com.deemons.dor.download.entity.Status;
@@ -49,7 +49,7 @@ public class LoadManager {
         DataBaseHelper dataBaseHelper = DataBaseHelper.getSingleton(builder.context);
         FileHelper fileHelper = new FileHelper(getMaxThreads(), builder.context.getApplicationInfo().uid);
 
-        DownloadApi downloadApi = builder.retrofit.create(DownloadApi.class);
+        Api downloadApi = builder.retrofit.create(Api.class);
         mCheckHelper = new CheckHelper(fileHelper,
                 downloadApi,
                 getSavePath(),

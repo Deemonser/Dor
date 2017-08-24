@@ -19,7 +19,7 @@ package com.deemons.dor.cookie;
 import okhttp3.CookieJar;
 
 /**
- * This interface extends {@link CookieJar} and adds methods to clear the cookies.
+ * This interface extends and adds methods to clear the cookies.
  */
 public interface ClearableCookieJar extends CookieJar {
 

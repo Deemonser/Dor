@@ -1,12 +1,16 @@
-package com.deemons.dor.download.constant;
+package com.deemons.dor.constant;
 
 import io.reactivex.Flowable;
 import io.reactivex.Observable;
+import okhttp3.MultipartBody;
 import okhttp3.ResponseBody;
 import retrofit2.Response;
 import retrofit2.http.GET;
 import retrofit2.http.HEAD;
 import retrofit2.http.Header;
+import retrofit2.http.Multipart;
+import retrofit2.http.POST;
+import retrofit2.http.Part;
 import retrofit2.http.Streaming;
 import retrofit2.http.Url;
 
@@ -16,7 +20,7 @@ import retrofit2.http.Url;
  * Time: 10:02
  * Download Api
  */
-public interface DownloadApi {
+public interface Api {
 
     /**
      * 下载的文件流
@@ -41,4 +45,14 @@ public interface DownloadApi {
     @HEAD
     Observable<Response<Void>> checkFileByHead(@Header("If-Modified-Since") String lastModify,
                                                @Url String url);
+
+
+
+    @Multipart
+    @POST()
+    Observable<ResponseBody> uploads(
+            @Url String url,
+            @Part MultipartBody.Part file);
+
+
 }

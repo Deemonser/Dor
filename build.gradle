@@ -10,16 +10,47 @@ buildscript {
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
+
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7'
     }
 }
 
 allprojects {
     repositories {
         jcenter()
-        maven { url "https://jitpack.io" }
     }
 }
 
 task clean(type: Delete) {
     delete rootProject.buildDir
+}
+
+
+//添加
+ext {
+    bintrayRepo = 'maven'
+    publishedGroupId = 'com.deemons.dor' //引用时 第一部分
+    libraryDescription = 'android network'//描述
+    siteUrl = 'https://github.com/Deemonser/Download'//项目地址
+    gitUrl = 'https://github.com/Deemonser/Download.git'//gitUrl
+    developerId = 'deemons'
+    developerName = 'deemonser'
+    developerEmail = 'deemonser@hotmail.com'
+    licenseName = 'The Apache Software License, Version 2.0'
+    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+    allLicenses = ["Apache-2.0"]
+
+
+}
+
+
+allprojects {
+    tasks.withType(Javadoc) {
+        options {
+            encoding "UTF-8"
+            charSet 'UTF-8'
+            links "http://docs.oracle.com/javase/7/docs/api"
+        }
+    }
 }

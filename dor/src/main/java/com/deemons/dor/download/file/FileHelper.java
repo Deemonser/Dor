@@ -20,7 +20,7 @@ import io.reactivex.FlowableEmitter;
 import okhttp3.ResponseBody;
 import retrofit2.Response;
 
-import static com.deemons.dor.download.constant.Constant.CHUNKED_DOWNLOAD_HINT;
+import static com.deemons.dor.constant.Constant.CHUNKED_DOWNLOAD_HINT;
 import static com.deemons.dor.utils.ResponesUtils.GMTToLong;
 import static com.deemons.dor.utils.ResponesUtils.closeQuietly;
 import static com.deemons.dor.utils.ResponesUtils.log;

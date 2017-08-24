@@ -40,7 +40,7 @@ public interface CookieManagerInterface {
     /**
      * 获取所以Cookie
      *
-     * @return List<Cookie>
+     * @return List
      */
     List<Cookie> getCookies();
 

@@ -2,7 +2,7 @@ package com.deemons.dor.download.check;
 
 import android.util.Log;
 
-import com.deemons.dor.download.constant.DownloadApi;
+import com.deemons.dor.constant.Api;
 import com.deemons.dor.download.entity.DownloadBean;
 import com.deemons.dor.download.file.FileHelper;
 import com.deemons.dor.download.load.DownloadType;
@@ -19,11 +19,11 @@ import io.reactivex.functions.Function;
 import retrofit2.Response;
 
 import static android.text.TextUtils.concat;
-import static com.deemons.dor.download.constant.Constant.CACHE;
-import static com.deemons.dor.download.constant.Constant.DOWNLOAD_RECORD_FILE_DAMAGED;
-import static com.deemons.dor.download.constant.Constant.REQUEST_RETRY_HINT;
-import static com.deemons.dor.download.constant.Constant.TEST_RANGE_SUPPORT;
-import static com.deemons.dor.download.constant.Constant.URL_ILLEGAL;
+import static com.deemons.dor.constant.Constant.CACHE;
+import static com.deemons.dor.constant.Constant.DOWNLOAD_RECORD_FILE_DAMAGED;
+import static com.deemons.dor.constant.Constant.REQUEST_RETRY_HINT;
+import static com.deemons.dor.constant.Constant.TEST_RANGE_SUPPORT;
+import static com.deemons.dor.constant.Constant.URL_ILLEGAL;
 import static com.deemons.dor.utils.ResponesUtils.contentLength;
 import static com.deemons.dor.utils.ResponesUtils.empty;
 import static com.deemons.dor.utils.ResponesUtils.fileName;
@@ -47,7 +47,7 @@ public class CheckHelper implements ICheckHelper {
 
 
     private FileHelper mFileHelper;
-    private DownloadApi mApi;
+    private Api mApi;
 
     private int maxRetryCount;
     private int maxThreads;
@@ -55,7 +55,7 @@ public class CheckHelper implements ICheckHelper {
     private String savePath;
 
 
-    public CheckHelper(FileHelper fileHelper, DownloadApi api, String savePath, int maxRetryCount, int maxThreads) {
+    public CheckHelper(FileHelper fileHelper, Api api, String savePath, int maxRetryCount, int maxThreads) {
         mApi = api;
         this.maxRetryCount = maxRetryCount;
         this.maxThreads = maxThreads;
