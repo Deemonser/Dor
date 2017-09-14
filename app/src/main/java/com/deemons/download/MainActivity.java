@@ -4,11 +4,10 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 import com.deemons.dor.Dor;
-import com.deemons.dor.error.NetConsumer;
+import com.deemons.dor.error.DorObserver;
 import com.deemons.dor.utils.RxUtils;
 
 import io.reactivex.annotations.NonNull;
-import io.reactivex.functions.Consumer;
 import okhttp3.ResponseBody;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
@@ -30,15 +29,10 @@ public class MainActivity extends AppCompatActivity {
 
         api.getGirlList(8, 8)
                 .compose(RxUtils.<String>io_main())
-                .subscribe(new Consumer<String>() {
+                .subscribe(new DorObserver<String>() {
                     @Override
-                    public void accept(@NonNull String s) throws Exception {
+                    public void onNext(@NonNull String s) {
 
-                    }
-                }, new NetConsumer() {
-                    @Override
-                    public void accept(@NonNull Throwable t) throws Exception {
-                        super.accept(t);
                     }
                 });
 
