@@ -4,11 +4,13 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 import com.deemons.dor.Dor;
+import com.deemons.dor.error.NetConsumer;
 import com.deemons.dor.utils.RxUtils;
 
 import io.reactivex.annotations.NonNull;
 import io.reactivex.functions.Consumer;
 import okhttp3.ResponseBody;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -22,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 
-        Dor.init(Dor.builder().context(this).baseUrl(API.HOST));
+        Dor.init(Dor.builder().context(this).baseUrl(API.HOST).logLevel(HttpLoggingInterceptor.Level.BODY));
 
         API api = Dor.getAPI(API.class);
 
@@ -32,6 +34,11 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void accept(@NonNull String s) throws Exception {
 
+                    }
+                }, new NetConsumer() {
+                    @Override
+                    public void accept(@NonNull Throwable t) throws Exception {
+                        super.accept(t);
                     }
                 });
 

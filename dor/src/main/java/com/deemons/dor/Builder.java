@@ -5,6 +5,8 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.deemons.dor.utils.CheckUtils;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,7 +42,7 @@ public class Builder {
     List<Interceptor> networkInterceptors = new ArrayList<>();
     List<CallAdapter.Factory> callAdapters = new ArrayList<>();
     List<Converter.Factory> converters = new ArrayList<>();
-    HashMap<String,String> headers;
+    HashMap<String, String> headers;
     HttpLoggingInterceptor loggingInterceptor;
     SSLSocketFactory sSLSocketFactory;
     HostnameVerifier hostnameVerifier;
@@ -50,14 +52,12 @@ public class Builder {
     String downloadSavePath;
     int maxRetryCount;
     int maxThreadCount;
+    private String dateFormat;
 
     Builder() {
-        callAdapters.add(RxJava2CallAdapterFactory.create());//使用rxjava
-        converters.add(ScalarsConverterFactory.create());//解析json 为 string，如果不引用此，也可用 JsonObject （非 JSONObject）接收
-        converters.add(GsonConverterFactory.create());//使用Gson
 
-        logLevel(HttpLoggingInterceptor.Level.NONE);
     }
+
 
     public Builder baseUrl(String baseUrl) {
         if (TextUtils.isEmpty(baseUrl)) {
@@ -81,7 +81,7 @@ public class Builder {
     }
 
 
-    public Builder header(String name,String value) {
+    public Builder header(String name, String value) {
         if (headers == null) {
             headers = new HashMap<>();
         }
@@ -160,14 +160,18 @@ public class Builder {
         return this;
     }
 
-
-    public Builder setAllCallAdapterFactory(@NonNull List<CallAdapter.Factory> list) {
-        callAdapters = list;
+    public Builder setGsonDateFormat(String format) {
+        this.dateFormat = format;
         return this;
     }
 
-    public Builder setAllConverterFactory(@NonNull List<Converter.Factory> list) {
-        converters = list;
+    public Builder addConverterFactory(@NonNull Converter.Factory factory) {
+        converters.add(factory);
+        return this;
+    }
+
+    public Builder addaddCallAdapterFactory(@NonNull CallAdapter.Factory factory) {
+        callAdapters.add(factory);
         return this;
     }
 
@@ -186,13 +190,34 @@ public class Builder {
         return this;
     }
 
-    public List<CallAdapter.Factory> getAllCallAdapterFactory() {
-        return callAdapters;
+
+    /**
+     * 初始化 默认值
+     */
+    void init() {
+        if (callAdapters.size() == 0) {
+            callAdapters.add(RxJava2CallAdapterFactory.create());//使用rxjava
+        }
+        if (converters.size() == 0) {
+            converters.add(ScalarsConverterFactory.create());//解析json 为 string，如果不引用此，也可用 JsonObject （非 JSONObject）接收
+            converters.add(getGsonConverter());//使用Gson
+        }
+
+        if (loggingInterceptor == null) {
+            logLevel(HttpLoggingInterceptor.Level.NONE);
+        }
     }
 
-    public List<Converter.Factory> getAllConverterFactory() {
-        return converters;
+    @NonNull
+    private GsonConverterFactory getGsonConverter() {
+        //Gson设置格式化日期
+        Gson gson = new GsonBuilder().setDateFormat(getDateFormat()).create();
+        return GsonConverterFactory.create(gson);
     }
 
+    @NonNull
+    private String getDateFormat() {
+        return TextUtils.isEmpty(dateFormat) ? "yyyy-MM-dd HH:mm:ss" : dateFormat;
+    }
 
 }

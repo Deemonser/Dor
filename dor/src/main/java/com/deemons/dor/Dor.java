@@ -30,7 +30,7 @@ import retrofit2.Retrofit;
  * 包名       com.deemons.network.provide
  * 描述
  * <p>
- * 1.网络请求Net
+ * 1.网络请求封装
  * 2.保持Retrofit特性，动态代理
  * 3.使用rxCache做网络缓存
  * 4.结合使用rxJava2
@@ -55,6 +55,8 @@ public final class Dor {
     private Retrofit retrofit;
 
     private Dor(Builder builder) {
+        //初始化默认值
+        builder.init();
 
         //添加 增加 Header 拦截器
         if (builder.headers != null) {
