@@ -1,4 +1,4 @@
-package com.deemons.dor.error.handler;
+package com.deemons.dor.error;
 
 import android.util.Log;
 
