@@ -55,7 +55,7 @@ ext {
 
     publishedGroupId = rootProject.publishedGroupId //引用时的第一部分
     artifact = 'dor'//引用时的第二部分
-    libraryVersion = '0.1.0'//引用时的第三部分
+    libraryVersion = '0.2.0'//引用时的第三部分
     libraryName = 'dor'//本module名称
     bintrayName = 'dor'//Jcenter 上显示的项目名
 
