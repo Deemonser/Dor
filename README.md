@@ -1,4 +1,4 @@
-![Travis](https://img.shields.io/travis/rust-lang/rust.svg)![](https://img.shields.io/badge/release-v0.2.0-green.svg)![](https://img.shields.io/badge/JCenter-0.2.0-brightgreen.svg)![](https://img.shields.io/badge/license-Apache2-blue.svg)
+![](https://img.shields.io/badge/build-passing-green.svg)&nbsp;![](https://img.shields.io/badge/release-v0.2.0-green.svg)&nbsp;![](https://img.shields.io/badge/JCenter-0.2.0-brightgreen.svg)&nbsp;![](https://img.shields.io/badge/license-Apache2-blue.svg)
 
 <br>
 
