@@ -1,29 +1,26 @@
 ext {
 
-    android = [
-            compileSdkVersion: 25,
-            buildToolsVersion: "25.0.2",
-            minSdkVersion    : 16,
-            targetSdkVersion : 25,
-            versionCode      : 1,
-            versionName      : "0.1.0",
+    android = [compileSdkVersion: 27,
+               buildToolsVersion: "27.0.3",
+               minSdkVersion    : 16,
+               targetSdkVersion : 27,
+               versionCode      : 1,
+               versionName      : "1.0.0",
 
-            javaVersion      : JavaVersion.VERSION_1_7
-    ]
+               javaVersion      : JavaVersion.VERSION_1_8]
 
-    depsVersion = [
-            support              : "25.3.1",
-            retrofitSdkVersion   : "2.2.0",
-            dagger2SdkVersion    : "2.10",
 
-            rxJavaSdkVersion     : "2.1.0",
-            rxAndroidSdkVersion  : "2.0.1",
-            rxlifecycleSdkVersion: "2.0.1",
-            rxbindingSdkVersion  : "2.0.0",
+    depsVersion = [support              : "27.1.1",
+                   retrofitSdkVersion   : "2.4.0",
+                   dagger2SdkVersion    : "2.15",
 
-            espressoSdkVersion   : "2.2.2"
+                   rxJavaSdkVersion     : "2.1.12",
+                   rxAndroidSdkVersion  : "2.0.2",
+                   rxlifecycleSdkVersion: "2.2.1",
+                   rxbindingSdkVersion  : "2.0.0",
 
-    ]
+                   espressoSdkVersion   : "3.0.1"]
+
 
     deps = [
 
@@ -34,7 +31,7 @@ ext {
             gson                    : "com.google.code.gson:gson:2.7",
             modulerouter            : "com.deemons.modulerouter:modulerouter:1.0.4",
             modulerouterApt         : "com.deemons.modulerouter:routerapt:1.0.4",
-            jodaTime                : "net.danlew:android.joda:2.9.9",
+            jodaTime                : "net.danlew:android.joda:2.9.9.1",
 
             // ------------- Rx  -------------
             rxJava                  : "io.reactivex.rxjava2:rxjava:${depsVersion.rxJavaSdkVersion}",
